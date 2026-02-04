@@ -32,10 +32,18 @@ extension Text{
             .background{
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .stroke(.buttonBorder,lineWidth: 5)
+
             }
     }
     func textUniversal() -> some View{
         self
+            .foregroundStyle(.text)
+            .font(.system(size: 22))
             .bold()
     }
+    func numberText() -> some View{
+        self
+            .font(.system(size: 100))
+            .bold()
+        }
 }
