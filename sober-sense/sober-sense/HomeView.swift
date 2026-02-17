@@ -122,11 +122,9 @@ struct ProfileView: View {
                         .padding(.horizontal)
                     
                     VStack(spacing: 0) {
-                        SettingsRow(icon: "bell.fill", title: "Notifications", iconColor: .buttonBorder, showChevron: true)
-                        Divider().padding(.leading)
-                        SettingsRow(icon: "lock.fill", title: "Privacy", iconColor: .buttonBorder, showChevron: true)
-                        Divider().padding(.leading)
-                        SettingsRow(icon: "info.circle.fill", title: "About", iconColor: .buttonBorder, showChevron: true)
+                        SettingsRow(icon: "bell.fill", title: "Notifications", iconColor: Color("buttonBorder"), showChevron: true)
+                        SettingsRow(icon: "lock.fill", title: "Privacy", iconColor: Color("buttonBorder"), showChevron: true)
+                        SettingsRow(icon: "info.circle.fill", title: "About", iconColor: Color("buttonBorder"), showChevron: true)
                     }
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
@@ -172,7 +170,7 @@ struct SettingsRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(iconColor)
                 .frame(width: 30)
             
             Text(title)
