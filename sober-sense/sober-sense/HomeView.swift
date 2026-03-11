@@ -184,7 +184,7 @@ struct SettingsRow: View {
             }
         }
         .padding()
-    }  
+    }
 }
 
 // Edit Profile Sheet
