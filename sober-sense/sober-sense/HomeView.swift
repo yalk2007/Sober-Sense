@@ -184,7 +184,7 @@ struct SettingsRow: View {
             }
         }
         .padding()
-    }
+    }  
 }
 
 // Edit Profile Sheet
@@ -255,22 +255,70 @@ struct EditProfileView: View {
 
 struct DataView: View{
     var body: some View{
-        VStack {
-            Text("History View")
-                .textUniversal()
-                .padding()
-            Button ("Date"){
-                print("you are an alchoholic")
+            VStack {
+                Text("History View")
+                    .textUniversal()
+                    .padding()
+                ZStack{
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.buttonBorder, lineWidth: 1)
+                        .padding()
+                    NavigationStack{
+                        ZStack{
+                        NavigationLink(destination: InnerDataView()){
+                            Text("BAC: 0.0")
+                                .frame(width: 300, height: 150)
+                                .padding(10)
+                                .foregroundColor(Color.white)
+                                .background(
+                                    RoundedRectangle(
+                                        cornerRadius: 20,
+                                        style: .continuous
+                                    )
+                                    .fill(.buttonBorder.opacity(0.5))
+                                )
+                            }
+                        }
+                    }
+                    .navigationTitle("History")
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.roundedRectangle(radius: 10))
-            .controlSize(.large)
-            
-            Spacer()
         }
-        .navigationTitle("History")
     }
-}
+
+    struct InnerDataView: View{
+        var body: some View{
+            VStack {
+                Text("*DATE*")
+                    .textUniversal()
+                    .padding()
+                ZStack{
+                    RoundedRectangle(cornerRadius: 20)
+                        .padding()
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(.buttonBorder)
+                    Text("Peak BAC: 0.0")
+                        .foregroundStyle(.black)
+                        .offset(x: 0, y: -210)
+                        .font(.system(size: 24)) //default font size--kept here for future reference
+                        //.fontDesign(.rounded)
+                        .fontWeight(.bold)
+                    VStack{
+                        Image(.overTimeGraph)
+                            .resizable()
+                            .frame(width: 275, height: 175)
+                            .position(x: 200, y: 150)
+                             .clipShape(RoundedRectangle(cornerRadius: 20))
+                        Image(.map)
+                            .resizable()
+                            .frame(width: 275, height: 175)
+                            .position(x: 200, y: 100)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                    }
+                    }
+                }
+            }
+        }
 
 struct HouseView_Previews: PreviewProvider {
     static var previews: some View {

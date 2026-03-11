@@ -195,6 +195,9 @@
 			);
 			mainGroup = 9A18EC672F2C79E200C4CE1C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9AAA96272F60F29700FD8E08 /* XCRemoteSwiftPackageReference "PythonKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9A18EC712F2C79E200C4CE1C /* Products */;
 			projectDirPath = "";
@@ -607,6 +610,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9AAA96272F60F29700FD8E08 /* XCRemoteSwiftPackageReference "PythonKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pvieito/PythonKit";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = 9A18EC682F2C79E200C4CE1C /* Project object */;
 }

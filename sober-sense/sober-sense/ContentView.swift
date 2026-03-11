@@ -9,14 +9,14 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        TabView{
-            Tab(Constants.homeString, systemImage: Constants.homeIconString){
+        TabView {
+            Tab(Constants.homeString, systemImage: Constants.homeIconString) {
                 Text("Sober Sense")
             }
-            Tab(Constants.dataString,systemImage: Constants.dataIconString){
+            Tab(Constants.dataString, systemImage: Constants.dataIconString) {
                 Text("Data")
             }
-            Tab(Constants.profileString, systemImage: Constants.profileIconString){
+            Tab(Constants.profileString, systemImage: Constants.profileIconString) {
                 Text("Account")
             }
         }
