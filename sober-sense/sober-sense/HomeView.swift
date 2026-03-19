@@ -1,145 +1,242 @@
+//
+//  HouseView.swift
+//  sober-sense
+//
+
 import SwiftUI
 
-struct HouseView: View {
-    @StateObject private var profileManager = ProfileManager()
-    
+// MARK: - Shared Data Model
+
+struct BACEntry: Identifiable {
+    let id = UUID()
+    let date: Date
+    let peakBAC: Double
+}
+
+let sampleHistory: [BACEntry] = [
+    BACEntry(date: Date().addingTimeInterval(-86400),     peakBAC: 0.08),
+    BACEntry(date: Date().addingTimeInterval(-86400 * 3), peakBAC: 0.05),
+    BACEntry(date: Date().addingTimeInterval(-86400 * 7), peakBAC: 0.12),
+]
+
+// MARK: - Shared History Card
+
+struct HistoryCard: View {
+    let entry: BACEntry
+
+    var dateString: String {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        return f.string(from: entry.date)
+    }
+
     var body: some View {
-        NavigationView {
-            HomeView(profileManager: profileManager)
-                .navigationTitle("Sober Sense")
-                .navigationBarTitleDisplayMode(.inline)
+        HStack {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(dateString)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.primary)
+                Text(String(format: "Peak BAC: %.2f", entry.peakBAC))
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            Text(String(format: "%.2f", entry.peakBAC))
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.buttonBorder)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.buttonBorder, lineWidth: 2)
+                )
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.secondary)
+                .padding(.leading, 8)
         }
+        .padding(16)
+        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Color(.systemGray6)))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.buttonBorder.opacity(0.4), lineWidth: 1))
+        .padding(.horizontal, 20)
     }
 }
+
+// MARK: - Home Screen
 
 struct HomeView: View {
     @ObservedObject var profileManager: ProfileManager
-    
+
     var body: some View {
-        VStack(spacing: 20) {
-            // Top section with BAC
-            VStack(spacing: 10) {
-                Text("Your BAC is:")
+        ScrollView {
+            VStack(spacing: 0) {
+                VStack(spacing: 8) {
+                    Text("Your BAC is:")
+                        .textUniversal()
+                    Text("0.00")
+                        .numberText()
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 50)
+                .padding(.bottom, 60)
+
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("History")
+                        .textUniversal()
+                        .padding(.horizontal, 20)
+                    ForEach(sampleHistory) { entry in
+                        NavigationLink(destination: DayDetailView(entry: entry)) {
+                            HistoryCard(entry: entry)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .padding(.bottom, 30)
+            }
+        }
+        .navigationTitle("Sober Sense")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Data View
+
+struct DataView: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("History")
                     .textUniversal()
-                
-                Text("0.00")
-                    .numberText()
-            }
-            .padding(.top, 60)
-            
-            Spacer()
-            
-            // Bottom buttons
-            HStack(spacing: 20) {
-                NavigationLink(destination: DataView()){
-                    Text(Constants.dataString)
-                        .ghostButton()
-                        .offset(x: -30)
-                }
-                // Pass ProfileManager to ProfileView
-                NavigationLink(destination: ProfileView(profileManager: profileManager)) {
-                    Text(Constants.profileString)
-                        .ghostButton()
-                        .offset(x: 30)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                ForEach(sampleHistory) { entry in
+                    NavigationLink(destination: DayDetailView(entry: entry)) {
+                        HistoryCard(entry: entry)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
+            .padding(.bottom, 30)
+        }
+        .navigationTitle("Data")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Day Detail View
+
+struct DayDetailView: View {
+    let entry: BACEntry
+
+    var dateString: String {
+        let f = DateFormatter()
+        f.dateStyle = .long
+        return f.string(from: entry.date)
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                VStack(spacing: 8) {
+                    Text(dateString)
+                        .font(.system(size: 15))
+                        .foregroundColor(.secondary)
+                    Text(String(format: "%.2f", entry.peakBAC))
+                        .font(.system(size: 72, weight: .bold))
+                        .foregroundColor(.buttonBorder)
+                    Text("Peak BAC")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+                .background(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color(.systemGray6))
+                        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color.buttonBorder.opacity(0.4), lineWidth: 1))
+                )
+                .padding(.horizontal, 20)
+
+                SectionCard(title: "BAC Over Time") {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray5)).frame(height: 160)
+                        Text("Graph coming soon").foregroundColor(.secondary).font(.system(size: 14))
+                    }
+                }
+
+                SectionCard(title: "Where You Went") {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray5)).frame(height: 180)
+                        VStack(spacing: 8) {
+                            Image(systemName: "map").font(.system(size: 32)).foregroundColor(.buttonBorder.opacity(0.6))
+                            Text("Location tracking coming soon").foregroundColor(.secondary).font(.system(size: 14))
+                        }
+                    }
+                }
+            }
+            .padding(.top, 20)
             .padding(.bottom, 40)
+        }
+        .navigationTitle(dateString)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct SectionCard<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: Content
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title).font(.system(size: 17, weight: .semibold)).padding(.horizontal, 20)
+            content.padding(.horizontal, 20)
         }
     }
 }
+
+// MARK: - Profile
 
 struct ProfileView: View {
     @ObservedObject var profileManager: ProfileManager
     @State private var isEditingProfile = false
-    
+
     var body: some View {
         ScrollView {
             VStack(spacing: 30) {
-                // Profile Header
                 VStack(spacing: 15) {
                     ZStack {
-                        Circle()
-                            .fill(Color.buttonBorder.opacity(0.2))
-                            .frame(width: 100, height: 100)
-                        
-                        Image(systemName: "person.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.buttonBorder)
+                        Circle().fill(Color.buttonBorder.opacity(0.2)).frame(width: 100, height: 100)
+                        Image(systemName: "person.fill").resizable().scaledToFit().frame(width: 50, height: 50).foregroundColor(.buttonBorder)
                     }
-                    
-                    Text(profileManager.currentProfile.name)
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                    Text(profileManager.currentProfile.name).font(.title2).fontWeight(.semibold)
                 }
                 .padding(.top, 20)
-                
-                // Personal Information Section
+
                 VStack(alignment: .leading, spacing: 15) {
-                    Text("Personal Information")
-                        .font(.headline)
-                        .padding(.horizontal)
-                    
+                    Text("Personal Information").font(.headline).padding(.horizontal)
                     VStack(spacing: 0) {
-                        ProfileInfoRow(
-                            label: "Name",
-                            value: profileManager.currentProfile.name
-                        )
+                        ProfileInfoRow(label: "Name",   value: profileManager.currentProfile.name)
                         Divider().padding(.leading)
-                        ProfileInfoRow(
-                            label: "Weight",
-                            value: "\(Int(profileManager.currentProfile.weight)) lbs"
-                        )
+                        ProfileInfoRow(label: "Weight", value: "\(Int(profileManager.currentProfile.weight)) lbs")
                         Divider().padding(.leading)
-                        ProfileInfoRow(
-                            label: "Gender",
-                            value: profileManager.currentProfile.gender.rawValue
-                        )
+                        ProfileInfoRow(label: "Gender", value: profileManager.currentProfile.gender.rawValue)
                     }
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                     .padding(.horizontal)
                 }
-                
-                // Edit Profile Button
-                Button(action: {
-                    isEditingProfile = true
-                }) {
-                    Text("Edit Profile")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.buttonBorder)  // Uses your app's accent color
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+
+                Button(action: { isEditingProfile = true }) {
+                    Text("Edit Profile").frame(maxWidth: .infinity).padding()
+                        .background(Color.buttonBorder).foregroundColor(.white).cornerRadius(10)
                 }
                 .padding(.horizontal)
-                
-                // App Settings Section
-                VStack(alignment: .leading, spacing: 15) {
-                    Text("Settings")
-                        .font(.headline)
-                        .padding(.horizontal)
-                    
-                    VStack(spacing: 0) {
-                        SettingsRow(icon: "bell.fill", title: "Notifications", iconColor: Color("buttonBorder"), showChevron: true)
-                        SettingsRow(icon: "lock.fill", title: "Privacy", iconColor: Color("buttonBorder"), showChevron: true)
-                        SettingsRow(icon: "info.circle.fill", title: "About", iconColor: Color("buttonBorder"), showChevron: true)
-                    }
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-                }
-                
+
                 Spacer()
             }
         }
         .navigationTitle("Profile")
         .sheet(isPresented: $isEditingProfile) {
-            EditProfileView(
-                profileManager: profileManager,
-                isPresented: $isEditingProfile
-            )
+            EditProfileView(profileManager: profileManager, isPresented: $isEditingProfile)
         }
     }
 }
@@ -147,96 +244,46 @@ struct ProfileView: View {
 struct ProfileInfoRow: View {
     let label: String
     let value: String
-    
     var body: some View {
         HStack {
-            Text(label)
-                .foregroundColor(.gray)
+            Text(label).foregroundColor(.gray)
             Spacer()
-            Text(value)
-                .fontWeight(.medium)
+            Text(value).fontWeight(.medium)
         }
         .padding()
     }
 }
 
-// Settings Row
-struct SettingsRow: View {
-    let icon: String
-    let title: String
-    let iconColor: Color
-    let showChevron: Bool
-    
-    var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(iconColor)
-                .frame(width: 30)
-            
-            Text(title)
-            
-            Spacer()
-            
-            if showChevron {
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
-                    .font(.system(size: 14))
-            }
-        }
-        .padding()
-    }
-}
-
-// Edit Profile Sheet
 struct EditProfileView: View {
     @ObservedObject var profileManager: ProfileManager
     @Binding var isPresented: Bool
-    
-    // Local state for editing
     @State private var editName: String = ""
     @State private var editWeight: String = ""
     @State private var editGender: UserProfile.Gender = .male
-    
+
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("Personal Details")) {
                     TextField("Name", text: $editName)
-                    
-                    TextField("Weight (lbs)", text: $editWeight)
-                        .keyboardType(.numberPad)
-                    
+                    TextField("Weight (lbs)", text: $editWeight).keyboardType(.numberPad)
                     Picker("Gender", selection: $editGender) {
-                        ForEach(UserProfile.Gender.allCases, id: \.self) { gender in
-                            Text(gender.rawValue).tag(gender)
-                        }
+                        ForEach(UserProfile.Gender.allCases, id: \.self) { g in Text(g.rawValue).tag(g) }
                     }
                 }
-                
                 Section {
                     Text("We use weight and gender to calculate your BAC more accurately! Click privacy to learn more.")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                        .font(.caption).foregroundColor(.gray)
                 }
             }
             .navigationTitle("Edit Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        isPresented = false
-                    }
-                }
-                
+                ToolbarItem(placement: .navigationBarLeading) { Button("Cancel") { isPresented = false } }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        // Save the changes to ProfileManager
                         if let weight = Double(editWeight) {
-                            profileManager.updateProfile(
-                                name: editName,
-                                weight: weight,
-                                gender: editGender
-                            )
+                            profileManager.updateProfile(name: editName, weight: weight, gender: editGender)
                         }
                         isPresented = false
                     }
@@ -244,8 +291,7 @@ struct EditProfileView: View {
                 }
             }
             .onAppear {
-                // Load current values
-                editName = profileManager.currentProfile.name
+                editName   = profileManager.currentProfile.name
                 editWeight = String(Int(profileManager.currentProfile.weight))
                 editGender = profileManager.currentProfile.gender
             }
@@ -253,75 +299,6 @@ struct EditProfileView: View {
     }
 }
 
-struct DataView: View{
-    var body: some View{
-            VStack {
-                Text("History View")
-                    .textUniversal()
-                    .padding()
-                ZStack{
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.buttonBorder, lineWidth: 1)
-                        .padding()
-                    NavigationStack{
-                        ZStack{
-                        NavigationLink(destination: InnerDataView()){
-                            Text("BAC: 0.0")
-                                .frame(width: 300, height: 150)
-                                .padding(10)
-                                .foregroundColor(Color.white)
-                                .background(
-                                    RoundedRectangle(
-                                        cornerRadius: 20,
-                                        style: .continuous
-                                    )
-                                    .fill(.buttonBorder.opacity(0.5))
-                                )
-                            }
-                        }
-                    }
-                    .navigationTitle("History")
-                }
-            }
-        }
-    }
-
-    struct InnerDataView: View{
-        var body: some View{
-            VStack {
-                Text("*DATE*")
-                    .textUniversal()
-                    .padding()
-                ZStack{
-                    RoundedRectangle(cornerRadius: 20)
-                        .padding()
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.buttonBorder)
-                    Text("Peak BAC: 0.0")
-                        .foregroundStyle(.black)
-                        .offset(x: 0, y: -210)
-                        .font(.system(size: 24)) //default font size--kept here for future reference
-                        //.fontDesign(.rounded)
-                        .fontWeight(.bold)
-                    VStack{
-                        Image(.overTimeGraph)
-                            .resizable()
-                            .frame(width: 275, height: 175)
-                            .position(x: 200, y: 150)
-                             .clipShape(RoundedRectangle(cornerRadius: 20))
-                        Image(.map)
-                            .resizable()
-                            .frame(width: 275, height: 175)
-                            .position(x: 200, y: 100)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                    }
-                    }
-                }
-            }
-        }
-
 struct HouseView_Previews: PreviewProvider {
-    static var previews: some View {
-        HouseView()
-    }
+    static var previews: some View { ContentView() }
 }

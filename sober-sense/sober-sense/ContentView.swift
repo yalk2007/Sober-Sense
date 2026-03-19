@@ -2,24 +2,39 @@
 //  ContentView.swift
 //  sober-sense
 //
-//  Created by Lucy Shah on 1/30/26.
-//
 
 import SwiftUI
 
+enum AppTab {
+    case data, home, settings, profile
+}
+
 struct ContentView: View {
+    @StateObject private var profileManager = ProfileManager()
+    @State private var selectedTab: AppTab = .home
+
     var body: some View {
-        TabView {
-            Tab(Constants.homeString, systemImage: Constants.homeIconString) {
-                Text("Sober Sense")
+        TabView(selection: $selectedTab) {
+            Tab("", systemImage: Constants.dataIconString, value: AppTab.data) {
+                NavigationView { DataView() }
             }
-            Tab(Constants.dataString, systemImage: Constants.dataIconString) {
-                Text("Data")
+            Tab("", systemImage: Constants.homeIconString, value: AppTab.home) {
+                NavigationView {
+                    HomeView(profileManager: profileManager)
+                        .navigationTitle("Sober Sense")
+                        .navigationBarTitleDisplayMode(.inline)
+                }
             }
-            Tab(Constants.profileString, systemImage: Constants.profileIconString) {
-                Text("Account")
+            Tab("", systemImage: "gearshape", value: AppTab.settings) {
+                SettingsView()
+            }
+            Tab("", systemImage: Constants.profileIconString, value: AppTab.profile) {
+                NavigationView {
+                    ProfileView(profileManager: profileManager)
+                }
             }
         }
+        .tint(.buttonBorder)
     }
 }
 
